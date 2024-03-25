@@ -27,6 +27,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'djongo',
+        'NAME': 'smartcity',
+    }
+}
 
 # Application definition
 
