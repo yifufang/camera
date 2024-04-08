@@ -10,6 +10,7 @@ class Device(models.Model):
     image_url = models.CharField(max_length=500)
     address = models.CharField(max_length=100)
     district = models.CharField(max_length=12)
+    enabled = models.BooleanField(default=True)
     
     class Meta:
         db_table = 'cameras'
