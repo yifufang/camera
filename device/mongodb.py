@@ -1,10 +1,13 @@
 from pymongo import MongoClient
 from django.utils import timezone
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 class MongoDBProcessor:
     def __init__(self):
         #mongoDB connection
-        self.client = MongoClient('mongodb://adminUser:adminPassword@54.177.184.253:27017/')
+        self.client = MongoClient(os.getenv('mongodb_uri'))
         self.db = self.client['smartcity']
         self.camera_collection = self.db['camera']
 

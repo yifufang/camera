@@ -27,14 +27,17 @@ class MysqlProcessor:
 
     def get_device_info(self, request_index):
         if Device.objects.filter(index=request_index).exists():
-            device_mysql = Device.objects.get(index=request_index)
+            device = Device.objects.get(index=request_index)
             device_info = {
-                'latitude': device_mysql.latitude,
-                'longitude': device_mysql.longitude,
-                'image_url': device_mysql.image_url,
-                'address': device_mysql.address,
-                'district': device_mysql.district,
-                'time': device_mysql.time
+                'id': device.id,
+                'latitude': device.latitude,
+                'longitude': device.longitude,
+                'index': device.index,
+                'image_url': device.image_url,
+                'address': device.address,
+                'district': device.district,
+                'time': str(device.time),
+                'enabled': device.enabled
             }
             return device_info
         else:
@@ -57,10 +60,10 @@ class MysqlProcessor:
         else:
             return False
     
-    def disable_device(self, request_index):
+    def disable_or_enable_device(self, request_index):
         if Device.objects.filter(index=request_index).exists():
             device_mysql = Device.objects.get(index=request_index)
-            device_mysql.enabled = False
+            device_mysql.enabled = not device_mysql.enabled
             device_mysql.save()
             return True
         else:
@@ -73,10 +76,30 @@ class MysqlProcessor:
             device_info.append({
                 'latitude': device.latitude,
                 'longitude': device.longitude,
+                'index': device.index,
                 'image_url': device.image_url,
                 'address': device.address,
                 'district': device.district,
-                'time': device.time
+                'time': str(device.time),
+                'enabled': device.enabled
             })
+        return device_info
+    
+    def get_all_devices(self):
+        devices = Device.objects.all()
+        device_info = {"cameras": {"0":[], "1":[], "2":[], "3":[], "4":[], "5":[], "6":[], "7":[], "8":[], "9":[], "10":[], "11":[], "12":[]}}
+        for device in devices:
+            data ={
+                'latitude': device.latitude,
+                'longitude': device.longitude,
+                'id': device.index,
+                'image_url': device.image_url,
+                'address': device.address,
+                'dist_id': device.district,
+                'time': str(device.time),
+                'status': 'active' if device.enabled else 'inactive'
+            }
+            device_info["cameras"][device.district].append(data)
+            device_info["cameras"]["0"].append(data)
         return device_info
     
