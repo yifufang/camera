@@ -8,36 +8,15 @@ import json
 
 @api_view(['POST'])
 def addDevice(request):
-    request_index = request.query_params.get('index')
+    request_id = int(request.query_params.get('id'))
     # add device info
     mongodb = MongoDBProcessor()
     mysql = MysqlProcessor()
-    deviceInfo = mongodb.get_camera_info(request_index)
+    deviceInfo = mongodb.get_camera_info(request_id)
     if mysql.add_device(deviceInfo):
         return Response('Device added', status=status.HTTP_200_OK)
     else:
         return Response('Device already exists', status=status.HTTP_409_CONFLICT)
-
-def UpdateDeviceInfo(request):
-    request_index = "1"
-    # update device info
-    mongodb = MongoDBProcessor()
-    mysql = MysqlProcessor()
-    deviceInfo = mongodb.get_camera_info(request_index)
-    mysql.update_device_info(deviceInfo)
-    
-    return HttpResponse('Device info updated')
-
-def getDeviceInfo(request):
-    request_index = "1"
-    # get device info
-    db = MysqlProcessor()
-    device_info = db.get_device_info(request_index)
-    if device_info:
-        json_data = json.dumps(device_info)
-        return HttpResponse(json_data, content_type='application/json')
-    else:
-        return HttpResponse('Device not found', content_type='application/json')
 
 @api_view(['GET'])
 def GetALLDevices(request):
@@ -48,40 +27,28 @@ def GetALLDevices(request):
 
 @api_view(['DELETE'])
 def deleteDevice(request):
-    request_index = request.query_params.get('index')
+    request_id = request.query_params.get('id')
     # delete device info
     db = MysqlProcessor()
-    if db.delete_device(request_index):
+    if db.delete_device(request_id):
         return Response('Device deleted', status=status.HTTP_200_OK)
     else:
         return Response('Device not found', status=status.HTTP_404_NOT_FOUND)
 
-def updateImage(request):
-    request_index = "1"
-    # update image url
-    mongodb = MongoDBProcessor()
-    image_url = mongodb.get_image_url(request_index)
-    db = MysqlProcessor()
-    if db.updateImage(request_index, image_url):
-        return HttpResponse('Image updated')
-    else:
-        return HttpResponse('Device not found')
-
 @api_view(['POST', 'GET'])
 def disableDevice(request):
-    if request.method == 'POST':
-        request_index = request.data.get('index')
-        # disable device
-        db = MysqlProcessor()
-        if db.disable_or_enable_device(request_index):
-            return Response('Status switched', status=status.HTTP_200_OK)
-        else:
-            return Response('Device not found', status=status.HTTP_404_NOT_FOUND)
-
-def get_device_of_district(request):
-    district = "1"
-    # get device info of district
+    request_id = request.query_params.get('id')
+    # disable device
     db = MysqlProcessor()
-    devices = db.get_all_devices_of_district(district)
-    print(devices)
-    return HttpResponse(devices)
+    if db.disable_or_enable_device(request_id):
+        return Response('Status switched', status=status.HTTP_200_OK)
+    else:
+        return Response('Device not found', status=status.HTTP_404_NOT_FOUND)
+        
+@api_view(['GET'])
+def searchedDevice(request):
+    search_term = request.query_params.get('search')
+    # search device
+    db = MongoDBProcessor()
+    result = db.search_device(search_term)
+    return Response(result, status=status.HTTP_200_OK)
