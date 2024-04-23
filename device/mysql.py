@@ -42,7 +42,7 @@ class MysqlProcessor:
                 'latitude': device.latitude,
                 'longitude': device.longitude,
                 'address': device.address,
-                'district': device.district,
+                'dist_id': device.district,
                 'time': str(device.time),
                 'status': 'active' if device.enabled else 'inactive',
                 'image_url': device.image_url,

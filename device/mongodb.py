@@ -40,7 +40,7 @@ class MongoDBProcessor:
                 'index': camera['index'],
                 'image_url': camera['currentImageURL'],
                 'address': (camera['nearbyPlace'] if 'nearbyPlace' in camera else '') + ', ' + (camera['locationName'] if 'locationName' in camera else ''),
-                'district': camera['district'],
+                'dist_id': camera['district'],
                 'time': str(timezone.now()),
                 'video_url': camera['streamingVideoURL'] if 'streamingVideoURL' in camera else ''
             }
