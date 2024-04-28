@@ -7,5 +7,7 @@ urlpatterns = [
     path('DeleteDevice/', views.deleteDevice),
     path('DisableDevice/', views.disableDevice),
     path('SearchedDevice/', views.searchedDevice),
+    path('StreamVideo/', views.streamVideo),
+    path('StopStream/', views.stopStream),
 ]
 

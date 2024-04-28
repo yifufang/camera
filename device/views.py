@@ -2,9 +2,16 @@ from django.shortcuts import render, HttpResponse, redirect
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from django.http import StreamingHttpResponse
 from .mongodb import MongoDBProcessor
 from .mysql import MysqlProcessor
 import json
+from .detection import detect
+import cv2
+import numpy as np
+from queue import Queue
+
+streaming = True
 
 @api_view(['POST'])
 def addDevice(request):
@@ -23,6 +30,8 @@ def GetALLDevices(request):
     # get all devices info
     db = MysqlProcessor()
     devices = db.get_all_devices()
+    global streaming
+    streaming = True
     return Response(devices, status=status.HTTP_200_OK)
 
 @api_view(['DELETE'])
@@ -52,3 +61,48 @@ def searchedDevice(request):
     db = MongoDBProcessor()
     result = db.search_device(search_term)
     return Response(result, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def streamVideo(request):
+    request_url = request.query_params.get('url')
+    # get video stream
+    # Open the video file
+    BUFFER_SIZE = 30
+    cap = cv2.VideoCapture(request_url)
+    # The buffer for storing frames
+    buffer = Queue(maxsize=BUFFER_SIZE)
+    print(streaming)
+    def generate():
+        while streaming:
+            ret, frame = cap.read()
+            if ret:
+                #frame = cv2.resize(frame, (640, 360))
+                results = detect(frame, incident=False)
+                results_incident = detect(frame, incident=True)
+                # Draw rectangle
+                for result in results:
+                    position = [int(p) for p in result['position']]
+                    cv2.rectangle(frame, (position[0], position[1]), (position[2], position[3]), (0, 255, 0), 2)
+                    cv2.putText(frame, result['label'], (position[0], position[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 2, cv2.LINE_AA)
+                
+                for result in results_incident:
+                    position = [int(p) for p in result['position']]
+                    cv2.rectangle(frame, (position[0], position[1]), (position[2], position[3]), (0, 0, 255), 2)
+                    cv2.putText(frame, result['label'], (position[0], position[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255), 2, cv2.LINE_AA)
+
+                # Encode the frame as JPEG
+                ret, jpeg = cv2.imencode('.jpeg', frame)
+                if ret:
+                    # Add the frame to the buffer
+                    buffer.put(jpeg.tobytes())
+
+                if buffer:
+                    yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + buffer.get() + b'\r\n\r\n')
+    
+    return StreamingHttpResponse(generate(), content_type='multipart/x-mixed-replace; boundary=frame')
+
+@api_view(['GET'])
+def stopStream(request):
+    global streaming
+    streaming = False
+    return Response('Stream stopped', status=status.HTTP_200_OK)
