@@ -15,3 +15,13 @@ class Device(models.Model):
     
     class Meta:
         db_table = 'cameras'
+
+class Incident(models.Model):
+    id = models.IntegerField(auto_created=True, primary_key=True)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    time = models.DateTimeField(auto_now=True)
+    type = models.CharField(max_length=45)
+    
+    class Meta:
+        db_table = 'incidents'

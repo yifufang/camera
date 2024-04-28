@@ -1,4 +1,4 @@
-from .models import Device
+from .models import Device, Incident
 
 class MysqlProcessor:
     def __init__(self):
@@ -52,3 +52,15 @@ class MysqlProcessor:
             device_info["cameras"]["0"].append(data)
     
         return device_info
+    
+    #add a new incident
+    def add_incidents(self,lat,lon,type):
+        try:
+            incident_mysql = Incident(latitude=lat, longitude=lon, type=type)
+            incident_mysql.save()
+            return True
+        except:
+            return False
+
+        
+

@@ -65,6 +65,9 @@ def searchedDevice(request):
 @api_view(['GET'])
 def streamVideo(request):
     request_url = request.query_params.get('url')
+    latitude = request.query_params.get('latitude')
+    longitude = request.query_params.get('longitude')
+
     # get video stream
     # Open the video file
     BUFFER_SIZE = 30
@@ -89,6 +92,15 @@ def streamVideo(request):
                     position = [int(p) for p in result['position']]
                     cv2.rectangle(frame, (position[0], position[1]), (position[2], position[3]), (0, 0, 255), 2)
                     cv2.putText(frame, result['label'], (position[0], position[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255), 2, cv2.LINE_AA)
+
+                # Add the incident to the database
+                if len(results_incident) > 0:
+                    db = MysqlProcessor()
+                    db.add_incidents(latitude, longitude, 'incident')
+
+                # Display total number of cars
+                cv2.putText(frame, f'Car: {len(results)}', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+                cv2.putText(frame, f'Incident: {len(results_incident)}', (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2, cv2.LINE_AA)
 
                 # Encode the frame as JPEG
                 ret, jpeg = cv2.imencode('.jpeg', frame)
