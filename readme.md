@@ -7,4 +7,4 @@ before you start this:
 then run this project run:
 
     pip install requirements.txt
-
+    python manage.py runserver
