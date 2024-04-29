@@ -56,22 +56,37 @@ class MysqlProcessor:
         return device_info
     
     #add a new incident, if theres one already, update the timestamp instead
-    def add_incidents(self,lat,lon,Type):
-        #lat decimal with 1 decimal place
-        lat = Decimal(lat).quantize(Decimal('1.0'))
-        #lon decimal with 1 decimal place
-        lon = Decimal(lon).quantize(Decimal('1.0'))
+    def add_incidents(self,lat,lon,Type, district):
+        #lat decimal with 5 decimal place
+        lat = Decimal(lat).quantize(Decimal('1.00000'))
+        #lon decimal with 5 decimal place
+        lon = Decimal(lon).quantize(Decimal('1.00000'))
 
-    
-        if Incident.objects.filter(latitude=lat,longitude=lon).exists():
-            incident = Incident.objects.get(latitude=lat,longitude=lon)
+        if Incident.objects.filter(latitude=lat,longitude=lon, district=district).exists():
+            incident = Incident.objects.get(latitude=lat,longitude=lon, district=district)
             incident.timestamp = timezone.now()
             incident.save()
             return False
         else:
-            incident = Incident(latitude=lat,longitude=lon,type=Type)
+            incident = Incident(latitude=lat,longitude=lon,type=Type, district=district)
             incident.save()
         return True
+    
+    def get_all_incidents(self):
+        incidents = Incident.objects.all()
+        incident_info = {"0":[], "1":[], "2":[], "3":[], "4":[], "5":[], "6":[], "7":[], "8":[], "9":[], "10":[], "11":[], "12":[]}
+        for incident in incidents:
+            data = {
+                'id': incident.id,
+                'latitude': incident.latitude,
+                'longitude': incident.longitude,
+                'timestamp': str(incident.timestamp),
+                'description': incident.type,
+                'dist_id': incident.district
+            }
+            incident_info[str(incident.district)].append(data)
+            incident_info["0"].append(data)
+        return incident_info
 
 def test():
     mysql = MysqlProcessor()

@@ -63,10 +63,18 @@ def searchedDevice(request):
     return Response(result, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+def GetAllIncidences(request):
+    # get all incidents
+    db = MysqlProcessor()
+    incidents = db.get_all_incidents()
+    return Response(incidents, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
 def streamVideo(request):
     request_url = request.query_params.get('url')
     latitude = request.query_params.get('latitude')
     longitude = request.query_params.get('longitude')
+    district = request.query_params.get('district')
 
     # get video stream
     # Open the video file
@@ -96,7 +104,7 @@ def streamVideo(request):
                 # Add the incident to the database
                 if len(results_incident) > 0:
                     db = MysqlProcessor()
-                    if db.add_incidents(latitude, longitude, 'incident') == False:
+                    if db.add_incidents(latitude, longitude, 'incident', district) == False:
                         print('Incident already exists')
                     else:
                         print('Incident added')
