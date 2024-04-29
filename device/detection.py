@@ -14,7 +14,7 @@ def detect(img, incident=False):
         if len(result.boxes.cls)>0:
             for i in range(len(result.boxes.cls)):
                 confidence = result.boxes.conf[i].item()
-                if incident and confidence < 0.8:
+                if incident and confidence < 0.3:
                     break
                 label_id = int(result.boxes.cls[i].item())
                 label = result.names[label_id]

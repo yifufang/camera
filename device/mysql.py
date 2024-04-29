@@ -1,4 +1,6 @@
 from .models import Device, Incident
+from django.utils import timezone
+from decimal import Decimal
 
 class MysqlProcessor:
     def __init__(self):
@@ -53,14 +55,32 @@ class MysqlProcessor:
     
         return device_info
     
-    #add a new incident
-    def add_incidents(self,lat,lon,type):
-        try:
-            incident_mysql = Incident(latitude=lat, longitude=lon, type=type)
-            incident_mysql.save()
-            return True
-        except:
-            return False
+    #add a new incident, if theres one already, update the timestamp instead
+    def add_incidents(self,lat,lon,Type):
+        #lat decimal with 1 decimal place
+        lat = Decimal(lat).quantize(Decimal('1.0'))
+        #lon decimal with 1 decimal place
+        lon = Decimal(lon).quantize(Decimal('1.0'))
 
-        
+    
+        if Incident.objects.filter(latitude=lat,longitude=lon).exists():
+            incident = Incident.objects.get(latitude=lat,longitude=lon)
+            incident.timestamp = timezone.now()
+            incident.save()
+            return False
+        else:
+            incident = Incident(latitude=lat,longitude=lon,type=Type)
+            incident.save()
+        return True
+
+def test():
+    mysql = MysqlProcessor()
+    lat = 37.7343
+    lon = -122.41
+    Type = 'incident'
+    result = mysql.add_incidents(lat,lon,Type)
+    if result:
+        print('Incident added successfully')
+    else:
+        print('Incident already exists')
 

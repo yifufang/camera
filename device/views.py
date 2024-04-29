@@ -96,7 +96,10 @@ def streamVideo(request):
                 # Add the incident to the database
                 if len(results_incident) > 0:
                     db = MysqlProcessor()
-                    db.add_incidents(latitude, longitude, 'incident')
+                    if db.add_incidents(latitude, longitude, 'incident') == False:
+                        print('Incident already exists')
+                    else:
+                        print('Incident added')
 
                 # Display total number of cars
                 cv2.putText(frame, f'Car: {len(results)}', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)

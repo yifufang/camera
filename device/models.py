@@ -17,11 +17,11 @@ class Device(models.Model):
         db_table = 'cameras'
 
 class Incident(models.Model):
-    id = models.IntegerField(auto_created=True, primary_key=True)
-    latitude = models.FloatField()
-    longitude = models.FloatField()
-    time = models.DateTimeField(auto_now=True)
+    id = models.AutoField(primary_key=True)
+    timestamp = models.DateTimeField(auto_now=True)
     type = models.CharField(max_length=45)
-    
+    latitude = models.DecimalField(max_digits=9, decimal_places=1)
+    longitude = models.DecimalField(max_digits=9, decimal_places=1)
+
     class Meta:
         db_table = 'incidents'
