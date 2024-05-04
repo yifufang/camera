@@ -1,0 +1,32 @@
+# Exclude all text files
+*.txt
+
+# Ignore all files in the logs directory
+logs/
+
+# Ignore node modules
+node_modules/
+
+# Ignore specific directories
+tmp/
+test/
+tests/
+spec/
+examples/
+
+# Ignore Dockerfile and docker-compose to prevent them from being sent to the daemon
+Dockerfile*
+docker-compose.yml
+docker-compose.*.yml
+
+# Ignore Git and version control
+.git/
+.gitignore
+
+# Ignore build outputs
+build/
+dist/
+
+# Ignore configuration files that are not needed
+*.md
+LICENSE
